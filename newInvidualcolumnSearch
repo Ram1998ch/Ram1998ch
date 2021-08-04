@@ -1,0 +1,404 @@
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>  
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+ 
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Mobile_Application</title>
+ <%@ include file="/WEB-INF/views/LoginFolders/Header.jsp"%>
+	    <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+	     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css ">-->
+
+
+
+<!--datatable  -->
+ <link href="resources/css/mystyles.css" rel="stylesheet">
+     
+<!--   <link rel="stylesheet" type="text/css"	href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+ -->  <script type="text/javascript"	src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript"	src=" https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>	<script type="text/javascript"src=" https://cdn.datatables.net/fixedcolumns/3.3.3/js/dataTables.fixedColumns.min.js"></script>
+  
+	
+	   <link rel="stylesheet" type="text/css"	href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+	 
+  <script type="text/javascript"	src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript"	src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+ 
+       <script type="text/javascript"	src="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css"></script>
+     	   <link rel="stylesheet" type="text/css"	href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+     
+            <script type="text/javascript"	src="https://code.jquery.com/jquery-3.5.1.js"></script>
+               <script type="text/javascript"	src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+     
+       <!--edit and delete-->
+ 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+     
+ <script> 
+   $(document).ready(function() {
+         
+   $('#example thead th').each( function (i) {
+        var title = $('#example tfoot th').eq($(this).index()).text();
+        $(this).html( '<input type="text" placeholder=" '+title+'" data-index="'+i+'" />' );
+    });
+   
+    
+    
+ var table = $('#example').DataTable({
+     
+        
+         "bServerSide"  : true,
+         "bSearchble"   : true,	
+         "searching"    : true,	
+        
+        
+           "sAjaxSource": "fetchUserList",
+             "fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
+      $.ajax( {
+        "dataType": 'json',
+        "type": "POST",
+        "url": sSource,
+        "data": aoData,
+        "success": fnCallback
+         
+      } );
+    },
+        "aoColumns":[
+             { "mData": "id.appId" },
+            { "mData": "id.clientName" },
+            { "mData": "id.imeiNumber" },
+            
+            { "mData": "status" },
+            { "mData": "registeredDate" },
+              {
+              render: function (data, type, row)
+                        {
+                            return "<a href='edit" + row.id.imeiNumber + "' class='fa fa-edit' data-target='#myModal' ></a>";
+                        }
+           },
+           
+             {
+          render: function (data, type, row)
+                        {
+                            return "<a href='deleteAuthoUser" + row.id.imeiNumber + "' class='fa fa-trash' data-target='#myModal' ></a>";
+                        }
+           },
+            
+        ],
+        "columnDefs": [{"targets": [0], "visible": true, "searchable": false}],
+        "sDom": 'W<"clear">lfrtip',
+        "oColumnFilterWidgets": {
+            "aiExclude": [0,1,2,3,4,5,6]
+        }
+       
+    
+ });
+  
+table.columns( '.select-filter' ).every( function () {
+    var that = this;
+ 
+    // Create the select list and search operation
+    var select = $('<select />')
+        .appendTo(
+            this.header()
+        )
+        .on( 'change', function () {
+            that
+                .search( $(this).val() )
+                .draw();
+        } );
+ 
+    // Get the search data for the first column and add to the select list
+    this
+        .cache( 'search' )
+        .sort()
+        .unique()
+        .each( function ( d ) {
+            select.append( $('<option value="'+d+'">'+d+'</option>') );
+        } );
+} ); 
+    	
+    	
+   // Filter event handler
+    $( table.table().container()).on('keyup', 'thead input', function () {
+             table  
+              .search('^'+this.value+'$', true, true) 
+              //.column( $(this).data('index') )
+              .search(this.value)
+              .draw();
+           
+    } );
+        table.columns().eq(0).each( function ( index ) {
+    var column = table.column( index );
+ 
+    var data = column.data();
+    // ... do something with data(), or column.nodes(), etc
+} );
+  var oSettings = table.fnSettings();
+  alert( oSettings._iDisplayStart );
+	 
+});
+ </script>      
+        
+     
+     
+     <script>
+      $(document).ready(function() {
+     /*  var status = '${command.status}';
+        if(${command.id.appName} != ''){
+        if(status==Enable){
+        document.getElementById('SEnable').checked =true ;
+        }
+        else{
+        document.getElementById('SDisable').checked =true ;
+        }
+        }
+   */
+    });
+     
+     </script>
+    <style>
+   
+      input[type=text], input[type=password] {
+      width: 100%;
+      padding: 16px 8px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      }
+      button {
+      background-color: #8ebf42;
+      color: white;
+      padding: 8px 0;
+      margin: 6px 0;
+      
+     
+      width: 100%;
+      }
+      h2 {
+      text-align:center;
+      fone-size:18;
+      }
+      
+      button:hover {
+      opacity: 0.8;
+      }
+      .formcontainer {
+      text-align: left;
+      margin: 24px 50px 12px;
+      }
+      .container {
+      padding: 16px 0;
+      text-align:left;
+      }
+      span.psw {
+      float: right;
+      padding-top: 0;
+      padding-right: 15px;
+      }
+#access {
+  margin-bottom: 15px;  
+}
+
+
+
+    </style>
+</head>
+<body>
+    <h2> Authorized Mobile Users Form:</h2>
+	<div class="clearfix"></div>
+	<div class="row">
+		<div id=rowdata>
+          <div class="container">
+ 		     <div class="panel">
+				<div class="panel-body">
+
+					<div class="row  border-bottom white-bg dashboard-header">
+						<div class="">
+							<div class="form-horizontal">
+							<div class="col-sm-8 col-sm-offset-2">
+   
+  
+       	
+							<div class="form-horizontal">
+							<div class="col-sm-8 col-sm-offset-2">
+       
+       
+            <div class="form-group">
+            
+	     <form:form action="saveConsumer"   method = "POST">
+	      
+    
+        <div class="form-group">
+   <div  class ="col-sm-5"><label >Application Id</label></div>
+     <div class="col-sm-7">    <form:select path="id.appId"   selected = "true"  id="onAppname"  onchange = "autofillValues()">
+                 <form:option value="-------SELECT---------"  /> 
+          	
+               <form:options items = "${command.retriveAppIdp}"   />  
+          
+          </form:select>
+         </div>
+         </div>
+          
+             
+              
+     <div class="form-group">
+               <div  class ="col-sm-5"> <label for = "id.clientName">Client Name</label></div>
+	    <div class="col-sm-7"> <input type = "text" name="id.clientName" class="form-control" placeholder="Enter Client Name" id="onChClientName" required>
+	     </div> 
+              </div>
+               <div class="form-group">
+   <div  class ="col-sm-5"> <label for = "consumerName">ConsumerName</label></div>
+	    <div class="col-sm-7"> <input type = "text" name = "consumerName"   class="form-control" placeholder="Enter Consumer Name"  required>
+	     </div> 
+	      </div>
+	       <div class="form-group">
+	    <div  class ="col-sm-5"><label for = "id.imeiNumber" >IMEI Number</label></div>
+	     <div class="col-sm-7"><input type = "text" name = "id.imeiNumber" value="${command.id.imeiNumber}"placeholder="Enter IMEI Number"required  class="form-control">
+	     </div>
+	     </div>
+	      <div class="form-group">
+   
+    <div  class ="col-sm-5"><label for = "status">Status</label></div>
+  <div class="col-sm-7"> <select name="status" selected="true"  >
+           <option value="" selected=selected >-------SELECT---------</option>
+          <option value="Enable" id="SEnable">Enable</option>
+          <option value="Disable" id="SDisable">Disable</option>
+    </select>
+  </div>
+           </div>
+            <div class="form-group">
+      <button type="submit" >Register</button>
+       <h4 align="center">${error}</h4>
+     </div>
+              </form:form>
+            </div>
+      </div>
+  
+   
+    </div>
+      </div>
+        
+ 
+ 
+
+      
+   
+ 		      
+<div class="clearfix"></div>
+	<div class="row">
+		<div id=rowdata>
+          <div class="container">
+ 		     <div class="panel">
+				<div class="panel-body">
+					 
+							 
+   
+  
+       	
+							 
+    <div class="form">
+		<div id="wrapper">
+			<div class="header">
+			    <div class="inner-header">
+					 
+			 
+ 
+
+			<div class="clearfix"></div>
+			 
+					<div class="container">
+					<div class="sub-header">
+						<h4>AUTHORIZED_USERS</h4>
+					</div>
+				</div>
+			</div>
+			  
+ 	<div style="height:auto; margin: 0 auto; align:center;">
+	  <form action="searchBy" onclick="document.getElementById('searchBy').style.color = 'green'" value="onchange"> 
+   
+							 
+								<label >Serch By</label>
+								 <select name="searchBy" id="searchBy" value="onchange" onchange =" this.form.submit();"   >
+							 	        
+							 	        <option>-----SELECT-----	</option> 
+										<option value=0 >Application Id</option> 
+										<option value=1 >Client Name</option>
+										<option value=2 >IMEI Number</option>
+								</select> 
+						  					</form>
+						  			 
+ 					 </div>
+			 
+				<div class="panel panel-default" style="height:auto; margin: 0 auto; align:center;">
+					<div class="panel-heading">Authorized Users Details</div>
+					<div class="panel-body">
+					<div class="row  border-bottom white-bg dashboard-header" >
+
+
+							
+							
+							
+						<!-- 	<table id="example"
+							class="display nowrap table table-responsive table-bordered table-hover table-striped"
+							style="overflow:inherit; width:100%; height: auto;"
+							cellspacing="0"> -->
+							<table id="example" class="stripe row-border order-column" style="width: auto;%">
+							<thead>
+								<tr>
+								 
+									<th>AppicationId</th>
+									<th>Client Name</th>
+									<th>IMEI Number</th>
+									<th>Status</th>
+									<th>RegisteredDate</th>
+									<th>Edit</th>
+ 									<th>Delete </th>
+ 									 
+								</tr>
+							</thead>
+							
+							<tfoot>
+							<tr>
+						        <th>AppicationId</th>
+									<th>Client Name</th>
+									<th>IMEI Number</th>
+ 							</tr>
+							</tfoot>
+							
+						 </table>
+					 
+
+					</div>
+				</div>
+			</div>
+</div>
+		</div>
+	</div>
+</div>
+ 	</div>
+ 	
+ 	 </div> 
+ 	  </div> 
+ 	    </div>  
+ 	      </div>   
+ 	        </div> 
+ 	           </div>
+ 	             </div> 
+ 	                 
+ 	                       
+ 	          
+ </div>
+   </div>
+  
+        
+              
+
+ 
+
+</body>
+</html>
